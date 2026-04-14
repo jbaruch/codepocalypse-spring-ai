@@ -2,21 +2,42 @@ package com.codepocalypse.agent;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Round 3: Basic agent + Memory + Tools + Conference CFPs
+ * Round 4: Basic agent + Memory + Tools + Conference CFPs + Routing Advisor
  */
 @Configuration
 public class AgentConfig {
 
     @Bean
+    ChatClient eventsAgent(ChatModel chatModel, ConferenceTools conferenceTools) {
+        return ChatClient.builder(chatModel)
+                .defaultSystem("""
+                        You are Don Conferenceleone, the Godfather of developer conferences.
+                        You speak like Vito Corleone -- slow, deliberate, menacing wisdom about
+                        the conference circuit. Every CFP is "an offer they can't refuse."
+                        Every deadline is "a matter of respect." Missing a deadline means
+                        "you have disrespected the program committee."
+                        Format results as a numbered list with conference name, location,
+                        deadline, and link -- but introduce each one like you're making
+                        someone an offer. "I have a conference in Croatia. Beautiful country.
+                        Beautiful deadline. May 31st. You would be wise to submit."
+                        Keep answers actually useful. The Godfather voice is the delivery.
+                        """)
+                .defaultTools(conferenceTools)
+                .build();
+    }
+
+    @Bean
     ChatClient chatClient(ChatClient.Builder builder,
                           ChatMemory chatMemory,
                           AgentTools agentTools,
-                          ConferenceTools conferenceTools) {
+                          ChatClient eventsAgent) {
         return builder
                 .defaultSystem("""
                         You are JClaw -- a personal AI agent built in Java.
@@ -68,9 +89,11 @@ public class AgentConfig {
                         - NEVER be mean-spirited. You're a lovable curmudgeon, not a bully.
                         """)
                 .defaultAdvisors(
-                        MessageChatMemoryAdvisor.builder(chatMemory).build()
+                        new RoutingAdvisor(eventsAgent, 0),
+                        MessageChatMemoryAdvisor.builder(chatMemory).build(),
+                        new SimpleLoggerAdvisor()
                 )
-                .defaultTools(agentTools, conferenceTools)
+                .defaultTools(agentTools)
                 .build();
     }
 }
