@@ -14,7 +14,7 @@
     <groupId>com.codepocalypse</groupId>
     <artifactId>codepocalypse-spring-ai</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>Codepocalypse Now - Spring AI Agent</name>
+    <name>JClaw - Spring AI Agent</name>
     <description>Personal AI agent built with Spring AI 2.0 for Codepocalypse Now</description>
 
     <properties>
@@ -41,6 +41,19 @@
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-starter-model-anthropic</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-model-chat-memory-repository-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-mcp-client</artifactId>
         </dependency>
 
         <!-- TUI4J: terminal chat client -->

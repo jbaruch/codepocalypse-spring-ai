@@ -1,20 +1,22 @@
 package com.codepocalypse.agent;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Configures the JClaw chat client with personality system prompt.
- *
- * Spring AI's philosophy: agents are just ChatClients with different system prompts,
- * tools, and advisors. No special "agent" abstraction needed -- it's all composition.
+ * Round 3: Basic agent + Memory + Tools + Conference CFPs
  */
 @Configuration
 public class AgentConfig {
 
     @Bean
-    ChatClient chatClient(ChatClient.Builder builder) {
+    ChatClient chatClient(ChatClient.Builder builder,
+                          ChatMemory chatMemory,
+                          AgentTools agentTools,
+                          ConferenceTools conferenceTools) {
         return builder
                 .defaultSystem("""
                         You are JClaw -- a personal AI agent built in Java.
@@ -65,6 +67,10 @@ public class AgentConfig {
                           method, not the content.
                         - NEVER be mean-spirited. You're a lovable curmudgeon, not a bully.
                         """)
+                .defaultAdvisors(
+                        MessageChatMemoryAdvisor.builder(chatMemory).build()
+                )
+                .defaultTools(agentTools, conferenceTools)
                 .build();
     }
 }
