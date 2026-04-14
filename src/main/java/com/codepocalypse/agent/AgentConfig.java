@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Round 4: Basic agent + Memory + Tools + Conference CFPs + Routing Advisor
+ * Round 5: Basic agent + Memory + Tools + Conference CFPs + Routing + Guardrails
  */
 @Configuration
 public class AgentConfig {
@@ -85,9 +85,11 @@ public class AgentConfig {
                         - NEVER be mean-spirited. You're a lovable curmudgeon, not a bully.
                         """)
                 .defaultAdvisors(
-                        new RoutingAdvisor(eventsAgent, 0),
-                        MessageChatMemoryAdvisor.builder(chatMemory).build(),
-                        new SimpleLoggerAdvisor()
+                        new PromptInjectionGuardAdvisor(0),      // Order 0: input guard
+                        new RoutingAdvisor(eventsAgent, 1),      // Order 1: routing
+                        MessageChatMemoryAdvisor.builder(chatMemory).build(), // Order 2: memory
+                        new OutputGuardAdvisor(3),                // Order 3: output guard
+                        new SimpleLoggerAdvisor()                 // Order 4: logging
                 )
                 .defaultTools(agentTools)
                 .build();
